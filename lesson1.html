@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDLC Practical Tasks: Deploy with AWS Amplify and GitHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .task {
+            margin-bottom: 20px;
+        }
+        .progress {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .description {
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SDLC Lesson 1: Deploying with AWS Amplify and GitHub</h1>
+
+    <div class="progress">
+        Progress: <span id="progress">0</span>%
+    </div>
+
+    <div class="task">
+        <input type="checkbox" id="task1" onclick="updateProgress()">
+        <label for="task1">Step 1: Set up AWS CLI on Linux</label>
+        <textarea id="desc1" class="description" placeholder="Add a description..."></textarea>
+    </div>
+
+    <div class="task">
+        <input type="checkbox" id="task2" onclick="updateProgress()">
+        <label for="task2">Step 2: Install Amplify CLI</label>
+        <textarea id="desc2" class="description" placeholder="Add a description..."></textarea>
+    </div>
+
+    <div class="task">
+        <input type="checkbox" id="task3" onclick="updateProgress()">
+        <label for="task3">Step 3: Initialize Amplify in the repo <code>space_shooter</code></label>
+        <textarea id="desc3" class="description" placeholder="Add a description..."></textarea>
+    </div>
+
+    <div class="task">
+        <input type="checkbox" id="task4" onclick="updateProgress()">
+        <label for="task4">Step 4: Connect Amplify to GitHub</label>
+        <textarea id="desc4" class="description" placeholder="Add a description..."></textarea>
+    </div>
+
+    <div class="task">
+        <input type="checkbox" id="task5" onclick="updateProgress()">
+        <label for="task5">Step 5: Deploy the app</label>
+        <textarea id="desc5" class="description" placeholder="Add a description..."></textarea>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const totalTasks = checkboxes.length;
+            let completedTasks = 0;
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) completedTasks++;
+            });
+
+            const progress = (completedTasks / totalTasks) * 100;
+            document.getElementById('progress').textContent = Math.round(progress);
+        }
+    </script>
+
+</body>
+</html>
