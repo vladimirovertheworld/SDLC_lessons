@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDLC and AWS Amplify - Lesson 1: Redeploying with AWS Amplify</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        textarea {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+        }
+        #progress {
+            margin-top: 20px;
+        }
+        .note {
+            background-color: #e6f7ff;
+            border-left: 5px solid #1890ff;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SDLC and AWS Amplify - Lesson 1</h1>
+        <h2>Redeploying with AWS Amplify</h2>
+        
+        <p>In this lesson, we'll learn how to redeploy our project using AWS CLI after making changes to the application files.</p>
+        
+        <h3>Prerequisites</h3>
+        <ul>
+            <li><input type="checkbox" id="prereq1"><label for="prereq1">AWS CLI installed and configured</label></li>
+            <li><input type="checkbox" id="prereq2"><label for="prereq2">Existing Amplify app deployed</label></li>
+            <li><input type="checkbox" id="prereq3"><label for="prereq3">Changes made to the application (e.g., renamed HTML file)</label></li>
+        </ul>
+        
+        <h3>Steps for Redeployment</h3>
+        <ul id="todoList">
+            <li>
+                <input type="checkbox" id="step1">
+                <label for="step1">Verify AWS CLI configuration</label>
+                <textarea placeholder="Add notes or commands here...">
+aws configure list
+# Ensure your credentials are correctly set
+                </textarea>
+            </li>
+            <li>
+                <input type="checkbox" id="step2">
+                <label for="step2">Get the Amplify App ID</label>
+                <textarea placeholder="Add notes or commands here...">
+# List all Amplify apps and note the App ID for your project
+aws amplify list-apps
+
+# Set the App ID as a variable (replace YOUR_APP_ID with the actual ID)
+APP_ID="YOUR_APP_ID"
+                </textarea>
+            </li>
+            <li>
+                <input type="checkbox" id="step3">
+                <label for="step3">Verify the branch name</label>
+                <textarea placeholder="Add notes or commands here...">
+# List all branches for your app
+aws amplify list-branches --app-id $APP_ID
+
+# Set the branch name as a variable (usually 'main' or 'master')
+BRANCH_NAME="main"
+                </textarea>
+            </li>
+            <li>
+                <input type="checkbox" id="step4">
+                <label for="step4">Commit and push changes</label>
+                <textarea placeholder="Add notes or commands here...">
+git add .
+git commit -m "Updated HTML file name"
+git push origin $BRANCH_NAME
+                </textarea>
+            </li>
+            <li>
+                <input type="checkbox" id="step5">
+                <label for="step5">Start a new deployment job</label>
+                <textarea placeholder="Add notes or commands here...">
+aws amplify start-job --app-id $APP_ID --branch-name $BRANCH_NAME --job-type RELEASE
+                </textarea>
+            </li>
+            <li>
+                <input type="checkbox" id="step6">
+                <label for="step6">Monitor the deployment</label>
+                <textarea placeholder="Add notes or commands here...">
+# Get the latest job ID
+JOB_ID=$(aws amplify list-jobs --app-id $APP_ID --branch-name $BRANCH_NAME | jq -r '.jobSummaries[0].jobId')
+
+# Check the job status
+aws amplify get-job --app-id $APP_ID --branch-name $BRANCH_NAME --job-id $JOB_ID
+                </textarea>
+            </li>
+            <li>
+                <input type="checkbox" id="step7">
+                <label for="step7">Verify the redeployment</label>
+                <textarea placeholder="Add notes or commands here...">
+# Get the app's domain
+DOMAIN=$(aws amplify get-app --app-id $APP_ID | jq -r '.app.defaultDomain')
+echo "App URL: https://$BRANCH_NAME.$DOMAIN"
+
+# Open the URL in a web browser to verify the changes
+                </textarea>
+            </li>
+        </ul>
+        
+        <div class="note">
+            <h3>Note</h3>
+            <p>If you encounter any issues during redeployment:</p>
+            <ul>
+                <li>Check the Amplify Console in the AWS Management Console for detailed logs and error messages.</li>
+                <li>Ensure that your build settings in the Amplify Console match your project structure, especially if you've renamed key files.</li>
+                <li>Verify that your AWS CLI has the necessary permissions to perform Amplify operations.</li>
+            </ul>
+        </div>
+
+        <div id="progress">
+            <h3>Progress</h3>
+            <canvas id="progressChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const todoList = document.getElementById('todoList');
+        const progressChart = document.getElementById('progressChart');
+        let myChart;
+
+        function updateProgress() {
+            const total = todoList.children.length;
+            const completed = Array.from(todoList.querySelectorAll('input[type="checkbox"]')).filter(cb => cb.checked).length;
+            const percentage = (completed / total) * 100;
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(progressChart, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'Remaining'],
+                    datasets: [{
+                        data: [completed, total - completed],
+                        backgroundColor: ['#36A2EB', '#FFCE56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: `Progress: ${percentage.toFixed(2)}%`
+                    }
+                }
+            });
+        }
+
+        todoList.addEventListener('change', updateProgress);
+        updateProgress();
+    </script>
+</body>
+</html>
